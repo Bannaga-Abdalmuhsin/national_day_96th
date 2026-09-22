@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Clock3, Database, LogOut, RadioTower } from "lucide-react";
 
 function useClock() {
@@ -53,7 +53,8 @@ function EmptyDashboard({ onLogout }: { onLogout: () => void }) {
         <button className="icon-button" title="Sign out" onClick={onLogout}><LogOut size={17} /></button>
       </header>
       <section className="empty-dashboard">
-        <div className="empty-panel"><Database size={42} /><h2>No live data connected</h2><p>The monitoring layout is ready for the live NOC database connection.</p></div>
+        <GoogleMap />
+        <div className="map-empty-state"><Database size={34} /><h2>No live site data</h2><p>Site markers will appear after the NOC database is connected.</p></div>
         <div className="empty-card-row">
           {["Total Sites","On-Air","At-Risk","Off-Air"].map(label => <div className="empty-kpi" key={label}><RadioTower size={17}/><span>{label}</span><strong>—</strong></div>)}
         </div>
@@ -61,6 +62,29 @@ function EmptyDashboard({ onLogout }: { onLogout: () => void }) {
     </main>
   );
 }
+
+function GoogleMap() {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) { setError("Google Maps API key is not available to the build."); return; }
+    const initialize = () => {
+      if (!mapRef.current || !window.google?.maps) return;
+      new window.google.maps.Map(mapRef.current, { center: { lat: 23.8859, lng: 45.0792 }, zoom: 5, mapTypeId: "roadmap", streetViewControl: false, fullscreenControl: true });
+    };
+    if (window.google?.maps) { initialize(); return; }
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}`;
+    script.async = true; script.onload = initialize;
+    script.onerror = () => setError("Google Maps could not be loaded.");
+    document.head.appendChild(script);
+    return () => { script.onload = null; script.onerror = null; };
+  }, []);
+  return <div className="map-frame">{error ? <div className="map-error">{error}</div> : <div ref={mapRef} className="google-map" />}</div>;
+}
+
+declare global { interface Window { google?: { maps: { Map: new (element: HTMLElement, options: Record<string, unknown>) => unknown } } } }
 
 export default function App() {
   const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem("national_day_session") === "preview");
