@@ -31,7 +31,42 @@ function SitePin({ site, selected, onSelect }: { site: Site; selected: boolean; 
   );
 }
 
+function Login({ onLogin }: { onLogin: () => void }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  function submit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!username.trim() || !password) return;
+    sessionStorage.setItem("national_day_session", "preview");
+    onLogin();
+  }
+
+  return (
+    <main className="login-page">
+      <div className="login-visual">
+        <div className="flag-glow" />
+        <div className="login-event-mark"><strong>96</strong><span>Saudi National Day</span></div>
+        <div className="login-copy"><span>National Operations Center</span><h1>24 COW Sites.<br />One Control Room.</h1><p>Live operational monitoring for Saudi National Day coverage, availability and field response.</p></div>
+      </div>
+      <section className="login-panel">
+        <div className="login-card">
+          <div className="login-brands"><img src={`${import.meta.env.BASE_URL}stc-logo.svg`} alt="stc" /><img src={`${import.meta.env.BASE_URL}aces-logo.svg`} alt="ACES" /></div>
+          <div className="login-heading"><span>SECURE ACCESS</span><h2>Control Room Login</h2><p>Sign in to access the National Day COW monitoring dashboard.</p></div>
+          <form onSubmit={submit}>
+            <label>Username</label><input value={username} onChange={e => setUsername(e.target.value)} placeholder="Enter username" autoComplete="username" required />
+            <label>Password</label><input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter password" autoComplete="current-password" required />
+            <button type="submit">Access Monitoring Dashboard</button>
+          </form>
+          <div className="login-status"><i /> Monitoring platform operational</div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
 export default function App() {
+  const [authenticated, setAuthenticated] = useState(() => sessionStorage.getItem("national_day_session") === "preview");
   const now = useClock();
   const [city, setCity] = useState("All Cities");
   const [query, setQuery] = useState("");
@@ -50,6 +85,8 @@ export default function App() {
   const atRisk = sites.filter(s => s.status === "AT-RISK").length;
   const availability = ((onAir + atRisk) / total * 100).toFixed(1);
 
+  if (!authenticated) return <Login onLogin={() => setAuthenticated(true)} />;
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -58,7 +95,7 @@ export default function App() {
         <div className="title-block"><span>96th Saudi National Day</span><h1>COW Sites Monitoring Control Room</h1></div>
         <div className="live-pill"><i /> LIVE MONITORING</div>
         <img src={`${import.meta.env.BASE_URL}aces-logo.svg`} className="aces-logo" alt="ACES" />
-        <button className="icon-button" title="Sign out"><LogOut size={17} /></button>
+        <button className="icon-button" title="Sign out" onClick={() => { sessionStorage.removeItem("national_day_session"); setAuthenticated(false); }}><LogOut size={17} /></button>
       </header>
 
       <section className="ticker">
