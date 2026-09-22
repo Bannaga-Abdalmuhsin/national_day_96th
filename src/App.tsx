@@ -82,7 +82,15 @@ function Login() {
 
   return (
     <main className="login-page">
-      <div className="login-background" aria-hidden="true" />
+      <svg className="login-filter-defs" width="0" height="0" aria-hidden="true">
+        <filter id="flag-wave" x="-10%" y="-10%" width="120%" height="120%" colorInterpolationFilters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.003 0.015" numOctaves="2" seed="3" result="noise">
+            <animate attributeName="baseFrequency" values="0.003 0.015;0.005 0.012;0.003 0.015" dur="5s" repeatCount="indefinite" />
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </svg>
+      <div className="login-background" aria-hidden="true"><div className="flag-motion" /></div>
       <section className="login-wrap">
         <div className="event-brand">
           <img className="login-stc-logo" src={STC_LOGO} alt="stc" />
