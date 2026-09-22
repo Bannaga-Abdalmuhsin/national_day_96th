@@ -1,0 +1,4 @@
+project_id = "qpnpqudrrrzgvfwdkljo"
+
+[functions.sync-national-day-data]
+verify_jwt = true
