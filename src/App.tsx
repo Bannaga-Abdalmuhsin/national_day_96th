@@ -51,6 +51,8 @@ type Outage = {
 
 type SiteStatus = "ON-AIR" | "AT-RISK" | "OFF-AIR";
 type SyncRun = { synced_at: string; status: string };
+import { useEffect, useRef, useState } from "react";
+import { Clock3, Database, LogOut, RadioTower } from "lucide-react";
 
 function useClock() {
   const [now, setNow] = useState(new Date());
@@ -253,12 +255,40 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         <div className="dashboard-grid">
           <section className="glass map-panel"><div className="panel-heading"><span><MapPin size={15} /> APPROVED SITE COVERAGE</span><b>{sites.length}/24</b></div><SiteMap sites={filteredSites} selected={selected} onSelect={setSelected} powerAlarms={powerAlarms} outages={outages} /></section>
           <aside className="glass alerts-panel"><div className="panel-heading"><span><AlertTriangle size={15} /> ACTIVE RECORDS</span><b>{powerAlarms.length + outages.length}</b></div><div className="record-list">{powerAlarms.length + outages.length === 0 ? <div className="empty-records">No live alarms or outages.</div> : <>{powerAlarms.map(item => <button className="record" key={`power-${item.id}`} onClick={() => setSelected(sites.find(site => site.site_id === item.site_id) ?? null)}><span><strong>{item.site_id} · POWER</strong><small>{item.problem_description || "Power alarm"}</small></span><em className="warning">{item.tt_severity || item.status || "OPEN"}</em></button>)}{outages.map(item => <button className="record" key={`outage-${item.id}`} onClick={() => setSelected(sites.find(site => site.site_id === item.site_id) ?? null)}><span><strong>{item.site_id} · OUTAGE</strong><small>{item.alarms_description || item.technology || "Outage record"}</small></span><em className="danger">{item.tt_severity || item.status || "OPEN"}</em></button>)}</>}</div></aside>
+      <section className="empty-dashboard">
+        <GoogleMap />
+        <div className="map-empty-state"><Database size={34} /><h2>No live site data</h2><p>Site markers will appear after the NOC database is connected.</p></div>
+        <div className="empty-card-row">
+          {["Total Sites","On-Air","At-Risk","Off-Air"].map(label => <div className="empty-kpi" key={label}><RadioTower size={17}/><span>{label}</span><strong>—</strong></div>)}
         </div>
         {selected && <section className="glass site-detail"><div className="site-detail-heading"><div><span><MapPin size={16} /> {selected.site_id}</span><h2>{selected.location_name || "Approved site"}</h2><p>{selected.area || "—"} · {selected.region || "—"} · {selected.vendor || "—"}</p></div><button className="close-button" onClick={() => setSelected(null)} aria-label="Close site details">×</button></div><div className="detail-columns"><div><h3>Power alarms <b>{selectedPower.length}</b></h3>{selectedPower.length === 0 ? <p className="muted">No live records.</p> : selectedPower.map(item => <div className="detail-record" key={item.id}><strong>{item.tt_number}</strong><span>{item.problem_description || "Power alarm"}</span><small>{formatDate(item.start_at)} · {item.status || "—"}</small></div>)}</div><div><h3>Outages <b>{selectedOutages.length}</b></h3>{selectedOutages.length === 0 ? <p className="muted">No live records.</p> : selectedOutages.map(item => <div className="detail-record" key={item.id}><strong>{item.tt_number}</strong><span>{item.alarms_description || item.technology || "Outage"}</span><small>{formatDate(item.oos_start_at)} · {item.status || "—"}</small></div>)}</div></div></section>}
       </section>
     </main>
   );
 }
+
+function GoogleMap() {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) { setError("Google Maps API key is not available to the build."); return; }
+    const initialize = () => {
+      if (!mapRef.current || !window.google?.maps) return;
+      new window.google.maps.Map(mapRef.current, { center: { lat: 23.8859, lng: 45.0792 }, zoom: 5, mapTypeId: "roadmap", streetViewControl: false, fullscreenControl: true });
+    };
+    if (window.google?.maps) { initialize(); return; }
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}`;
+    script.async = true; script.onload = initialize;
+    script.onerror = () => setError("Google Maps could not be loaded.");
+    document.head.appendChild(script);
+    return () => { script.onload = null; script.onerror = null; };
+  }, []);
+  return <div className="map-frame">{error ? <div className="map-error">{error}</div> : <div ref={mapRef} className="google-map" />}</div>;
+}
+
+declare global { interface Window { google?: { maps: { Map: new (element: HTMLElement, options: Record<string, unknown>) => unknown } } } }
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
