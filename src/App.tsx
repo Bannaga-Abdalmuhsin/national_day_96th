@@ -50,11 +50,19 @@ function EmptyDashboard({ onLogout }: { onLogout: () => void }) {
   return (
     <main className="dashboard-shell">
       <header className="topbar">
-        <img src={`${import.meta.env.BASE_URL}stc-logo.svg`} className="stc-logo" alt="stc" />
+        <img
+          src="https://cdn.builder.io/api/v1/image/assets%2F933b4488987b460eb6835be6e207de9f%2F7878b58181884abab63229785c2bd952?format=webp&width=800&height=1200"
+          className="stc-logo"
+          alt="stc"
+        />
         <div className="date-card"><Clock3 size={15} /><div><strong>{now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</strong><span>{now.toLocaleTimeString("en-GB")}</span></div></div>
-        <div className="title-block"><span>96th Saudi National Day</span><h1>COW Sites Monitoring Control Room</h1></div>
+        <div className="title-block"><span>96th Saudi National Day</span><h1>stc COW Interactive TT Status</h1></div>
         <div className="connection-pill"><i /> AWAITING NOC DATA</div>
-        <img src={`${import.meta.env.BASE_URL}aces-logo.svg`} className="aces-logo" alt="ACES" />
+        <img
+          src="https://cdn.builder.io/api/v1/image/assets%2F933b4488987b460eb6835be6e207de9f%2F65975bef1fbc41deba818987731012ae?format=webp&width=800&height=1200"
+          className="aces-logo"
+          alt="ACES"
+        />
         <button className="icon-button" title="Sign out" onClick={onLogout}><LogOut size={17} /></button>
       </header>
       <section className="empty-dashboard">
