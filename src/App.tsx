@@ -21,9 +21,14 @@ function Login({ onLogin }: { onLogin: () => void }) {
   }
   return (
     <main className="login-page">
-      <div className="login-background" aria-hidden="true"><div className="orb orb-one" /><div className="orb orb-two" /></div>
+      <div className="login-background" aria-hidden="true" />
       <section className="login-wrap">
         <div className="event-brand">
+          <img
+            className="login-stc-logo"
+            src="https://cdn.builder.io/api/v1/image/assets%2F933b4488987b460eb6835be6e207de9f%2F7878b58181884abab63229785c2bd952?format=webp&width=800&height=1200"
+            alt="stc"
+          />
           <span className="saudi-flag" role="img" aria-label="Saudi Arabia flag">🇸🇦</span>
           <h1>National Day 96th</h1>
         </div>
